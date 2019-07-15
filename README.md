@@ -1,7 +1,7 @@
 # i2c
 
-[![GitHub forks](https://img.shields.io/github/forks/abdandonware/node-i2c.svg?style=social&label=Fork&maxAge=2592000)](https://GitHub.com/abdandonware/node-i2c/network/)
-[![NPM](https://img.shields.io/npm/v/i2c.svg)](https://www.npmjs.com/package/@abandonware/i2c)
+[![GitHub forks](https://img.shields.io/github/forks/abandonware/node-i2c.svg?style=social&label=Fork&maxAge=2592000)](https://GitHub.com/abandonware/node-i2c/network/)
+[![NPM](https://img.shields.io/npm/v/@abandonware/i2c.svg)](https://www.npmjs.com/package/@abandonware/i2c)
 
 Bindings for i2c-dev. Plays well with Raspberry Pi and Beaglebone.
 
