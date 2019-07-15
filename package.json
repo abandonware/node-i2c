@@ -1,12 +1,15 @@
 {
-  "name": "i2c",
+  "name": "@abandonware/i2c",
   "version": "0.2.3",
   "description": "Native bindings for i2c-dev. Plays well with Raspberry Pi and BeagleBone.",
   "main": "main.js",
   "author": "Kelly Korevec",
+  "maintainer": [
+    "Philippe Coval <https://www.npmjs.com/~rzr>"
+  ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/korevec/node-i2c.git"
+    "url": "http://github.com/abandonware/node-i2c.git"
   },
   "license": "BSD-3-Clause-Attribution",
   "dependencies": {
