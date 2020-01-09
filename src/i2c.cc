@@ -35,7 +35,11 @@ void SetAddress(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     Nan::ThrowTypeError("addr must be an int");
     return;
   }
+#if V8_MAJOR_VERSION >= 7
+  addr = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+#else
   addr = info[0]->Int32Value();
+#endif
   setAddress(addr);
 }
 
@@ -81,7 +85,11 @@ void Close(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 void Open(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::HandleScope scope;
 
+#if V8_MAJOR_VERSION >= 7
+  String::Utf8Value device(0, info[0]);
+#else
   String::Utf8Value device(info[0]);
+#endif
   Local<Value> err = Nan::New<Value>(Nan::Null());
 
   fd = open(*device, O_RDWR);
@@ -100,7 +108,11 @@ void Open(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 void Read(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::HandleScope scope;
 
+#if V8_MAJOR_VERSION >= 7
+  int len = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+#else
   int len = info[0]->Int32Value();
+#endif
 
   Local<Array> data = Nan::New<Array>();
 
@@ -151,8 +163,14 @@ void ReadByte(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 void ReadBlock(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::HandleScope scope;
 
+#if V8_MAJOR_VERSION >= 7
+  int8_t cmd = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+  int32_t len = info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
+#else
   int8_t cmd = info[0]->Int32Value();
   int32_t len = info[1]->Int32Value();
+#endif
+
   uint8_t data[len]; 
   Local<Value> err = Nan::New<Value>(Nan::Null());
   // Local<Object> buffer = node::Buffer::New(len);
@@ -175,7 +193,12 @@ void ReadBlock(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
  
     if (info[2]->IsNumber()) {
+#if V8_MAJOR_VERSION >= 7
+      int32_t delay = info[2]->Int32Value(Nan::GetCurrentContext()).FromJust();
+#else
       int32_t delay = info[2]->Int32Value();
+#endif
+
       usleep(delay * 1000);
     } else {
       break;
@@ -188,10 +211,14 @@ void ReadBlock(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 void Write(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::HandleScope scope;
 
-  Local<Value> buffer = info[0];
+#if V8_MAJOR_VERSION >= 7
+  Local<Object> buffer = info[0].As<v8::Object>();
+#else
+  Local<Object> buffer = info[0]->ToObject();
+#endif
 
-  int   len = node::Buffer::Length(buffer->ToObject());
-  char* data = node::Buffer::Data(buffer->ToObject());
+  int   len = node::Buffer::Length(buffer);
+  char* data = node::Buffer::Data(buffer);
 
   Local<Value> err = Nan::New<Value>(Nan::Null());
 
@@ -210,7 +237,12 @@ void Write(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 void WriteByte(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::HandleScope scope;
 
+#if V8_MAJOR_VERSION >= 7
+  int8_t byte = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+#else
   int8_t byte = info[0]->Int32Value();
+#endif
+
   Local<Value> err = Nan::New<Value>(Nan::Null());
 
   if (i2c_smbus_write_byte(fd, byte) == -1) {
@@ -229,9 +261,16 @@ void WriteBlock(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::HandleScope scope;
 
   Local<Value> buffer = info[1];
+
+#if V8_MAJOR_VERSION >= 7
+  int8_t cmd = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+  int   len = node::Buffer::Length(buffer.As<v8::Object>());
+  char* data = node::Buffer::Data(buffer.As<v8::Object>());;
+#else
   int8_t cmd = info[0]->Int32Value();
   int   len = node::Buffer::Length(buffer->ToObject());
   char* data = node::Buffer::Data(buffer->ToObject());
+#endif
 
   Local<Value> err = Nan::New<Value>(Nan::Null());
 
@@ -249,9 +288,14 @@ void WriteBlock(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
 void WriteWord(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::HandleScope scope;
-  
+
+#if V8_MAJOR_VERSION >= 7
+  int8_t cmd = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+  int16_t word = info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
+#else
   int8_t cmd = info[0]->Int32Value();
   int16_t word = info[1]->Int32Value();
+#endif
 
   Local<Value> err = Nan::New<Value>(Nan::Null());
   
@@ -267,6 +311,21 @@ void WriteWord(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
+#if V8_MAJOR_VERSION >= 7
+NAN_MODULE_INIT(Init) {
+  Nan::HandleScope scope;
+  Nan::SetMethod(target, "setAddress", SetAddress);
+  Nan::SetMethod(target, "scan", Scan);
+  Nan::SetMethod(target, "open", Open);
+  Nan::SetMethod(target, "close", Close);
+  Nan::SetMethod(target, "write", Write);
+  Nan::SetMethod(target, "writeByte", WriteByte);
+  Nan::SetMethod(target, "writeBlock", WriteBlock);
+  Nan::SetMethod(target, "read", Read);
+  Nan::SetMethod(target, "readByte", ReadByte);
+  Nan::SetMethod(target, "readBlock", ReadBlock);
+}
+#else
 void Init(Handle<Object> exports) {
 
   exports->Set(Nan::New("setAddress").ToLocalChecked(),
@@ -291,5 +350,6 @@ void Init(Handle<Object> exports) {
                Nan::New<v8::FunctionTemplate>(ReadBlock)->GetFunction());
 
 }
+#endif
 
 NODE_MODULE(i2c, Init)
