@@ -11,14 +11,14 @@ Bindings for i2c-dev. Plays well with Raspberry Pi and Beaglebone.
 ## Install
 
 ````bash
-$ npm install i2c
+$ npm install @abandonware/i2c
 ````
 
 ## Usage
 
 ```javascript
 
-var i2c = require('i2c');
+var i2c = require('@abandonware/i2c');
 var address = 0x18;
 var wire = new i2c(address, {device: '/dev/i2c-1'}); // point to your i2c address, debug provides REPL interface
 
