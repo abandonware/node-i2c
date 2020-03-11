@@ -13,3 +13,4 @@ jobs:
         uses: rzr/fediverse-action@master
         with:
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          message: "https://github.com/abandonware/node-i2c/# #NodeI2C released for #I2C with #NodeJs ! ~ #FediverseAction"
