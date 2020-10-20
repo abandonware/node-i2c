@@ -61,7 +61,11 @@ void Scan(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     if (res >= 0) {
       res = i;
     }
+#if V8_MAJOR_VERSION >= 8
+    results->Set(Nan::GetCurrentContext(), i, Nan::New<Integer>(res));
+#else
     results->Set(i, Nan::New<Integer>(res));
+#endif
   }
 
   setAddress(addr);
@@ -123,7 +127,11 @@ void Read(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     err = Nan::Error(Nan::New("Cannot read from device").ToLocalChecked());
   } else {
     for (int i = 0; i < len; ++i) {
+#if V8_MAJOR_VERSION >= 8
+      data->Set(Nan::GetCurrentContext(), i, Nan::New<Integer>(buf[i]));
+#else
       data->Set(i, Nan::New<Integer>(buf[i]));
+#endif
     }
   }
   delete[] buf;
